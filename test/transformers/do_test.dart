@@ -10,7 +10,7 @@ void main() {
     test('calls onDone when the stream is finished', () async {
       var onDoneCalled = false;
       final observable =
-          Observable<void>.empty().doOnDone(() => onDoneCalled = true);
+          Stream<void>.empty().doOnDone(() => onDoneCalled = true);
 
       await expectLater(observable, emitsDone);
       await expectLater(onDoneCalled, isTrue);
@@ -18,7 +18,7 @@ void main() {
 
     test('calls onError when an error is emitted', () async {
       var onErrorCalled = false;
-      final observable = Observable<void>.error(Exception())
+      final observable = Stream<void>.error(Exception())
           .doOnError((dynamic e, dynamic s) => onErrorCalled = true);
 
       await expectLater(observable, emitsError(isException));
@@ -115,8 +115,8 @@ void main() {
       StackTrace stacktrace;
       final actual = <Notification<int>>[];
       final exception = Exception();
-      final observable = Observable.just(1).concatWith(
-          [Observable<int>.error(exception)]).doOnEach((notification) {
+      final observable = Observable.just(1)
+          .concatWith([Stream<int>.error(exception)]).doOnEach((notification) {
         actual.add(notification);
 
         if (notification.isOnError) {
@@ -155,7 +155,7 @@ void main() {
 
     test('calls onListen when a consumer listens', () async {
       var onListenCalled = false;
-      final observable = Observable<void>.empty().doOnListen(() {
+      final observable = Stream<void>.empty().doOnListen(() {
         onListenCalled = true;
       });
 
@@ -168,8 +168,7 @@ void main() {
       var onListenCallCount = 0;
       final sc = StreamController<int>.broadcast()..add(1)..add(2)..add(3);
 
-      final observable =
-          Observable(sc.stream).doOnListen(() => onListenCallCount++);
+      final observable = sc.stream.doOnListen(() => onListenCallCount++);
 
       observable.listen(null);
       observable.listen(null);
@@ -229,7 +228,7 @@ void main() {
               onError: expectAsync2(
                   (Exception e, [StackTrace s]) => expect(e, isException)));
 
-      Observable<void>.error(Exception('oh noes!'))
+      Stream<void>.error(Exception('oh noes!'))
           .doOnError((dynamic _, dynamic __) =>
               throw Exception('catch me if you can! doOnError'))
           .listen(null,

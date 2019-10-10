@@ -23,9 +23,7 @@ void main(List<String> arguments) {
   // starting value for the [scan] method
   const seed = IndexedPair(1, 1, 0);
 
-  Observable
-          // amount of numbers to compute
-          .range(1, n)
+  RangeStream(1, n)
       // accumulator: computes a new accumulated
       // value each time a [Stream] event occurs
       // in this case, the accumulated value is always

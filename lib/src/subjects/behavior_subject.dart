@@ -1,7 +1,8 @@
 import 'dart:async';
 
-import 'package:rxdart/src/observables/observable.dart';
-import 'package:rxdart/src/observables/value_observable.dart';
+import 'package:rxdart/rxdart.dart';
+import 'package:rxdart/src/streams/defer.dart';
+import 'package:rxdart/src/streams/value_stream.dart';
 import 'package:rxdart/src/subjects/subject.dart';
 
 /// A special StreamController that captures the latest item that has been
@@ -37,12 +38,12 @@ import 'package:rxdart/src/subjects/subject.dart';
 ///     subject.stream.listen(print); // prints 1
 ///     subject.stream.listen(print); // prints 1
 ///     subject.stream.listen(print); // prints 1
-class BehaviorSubject<T> extends Subject<T> implements ValueObservable<T> {
+class BehaviorSubject<T> extends Subject<T> implements ValueStream<T> {
   _Wrapper<T> _wrapper;
 
   BehaviorSubject._(
     StreamController<T> controller,
-    Observable<T> observable,
+    Stream<T> observable,
     this._wrapper,
   ) : super(controller, observable);
 
@@ -62,7 +63,7 @@ class BehaviorSubject<T> extends Subject<T> implements ValueObservable<T> {
 
     return BehaviorSubject<T>._(
         controller,
-        Observable<T>.defer(_deferStream(wrapper, controller), reusable: true),
+        DeferStream<T>(_deferStream(wrapper, controller), reusable: true),
         wrapper);
   }
 
@@ -83,7 +84,7 @@ class BehaviorSubject<T> extends Subject<T> implements ValueObservable<T> {
 
     return BehaviorSubject<T>._(
         controller,
-        Observable<T>.defer(_deferStream(wrapper, controller), reusable: true),
+        DeferStream<T>(_deferStream(wrapper, controller), reusable: true),
         wrapper);
   }
 
@@ -94,8 +95,8 @@ class BehaviorSubject<T> extends Subject<T> implements ValueObservable<T> {
           scheduleMicrotask(() => controller.addError(
               wrapper.latestError, wrapper.latestStackTrace));
         } else if (wrapper.latestIsValue) {
-          return Observable<T>(controller.stream)
-              .startWith(wrapper.latestValue);
+          return controller.stream
+              .transform(StartWithStreamTransformer(wrapper.latestValue));
         }
 
         return controller.stream;
@@ -109,7 +110,7 @@ class BehaviorSubject<T> extends Subject<T> implements ValueObservable<T> {
       _wrapper.setError(error, stackTrace);
 
   @override
-  ValueObservable<T> get stream => this;
+  ValueStream<T> get stream => this;
 
   @override
   bool get hasValue => _wrapper.latestIsValue;

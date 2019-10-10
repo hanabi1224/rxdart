@@ -13,17 +13,17 @@ List<Stream<int>> _getStreams() {
 List<Stream<int>> _getStreamsIncludingEmpty() {
   var a = Stream.fromIterable(const [0, 1, 2]),
       b = Stream.fromIterable(const [3, 4, 5]),
-      c = Observable<int>.empty();
+      c = Stream<int>.empty();
 
   return [c, a, b];
 }
 
 void main() {
-  test('rx.Observable.concatEager', () async {
+  test('rx.ConcatEagerStream', () async {
     const expectedOutput = [0, 1, 2, 3, 4, 5];
     var count = 0;
 
-    final observable = Observable.concatEager(_getStreams());
+    final observable = ConcatEagerStream(_getStreams());
 
     observable.listen(expectAsync1((result) {
       // test to see if the combined output matches
@@ -31,18 +31,18 @@ void main() {
     }, count: expectedOutput.length));
   });
 
-  test('rx.Observable.concatEager.single.subscription', () async {
-    final observable = Observable.concatEager(_getStreams());
+  test('rx.ConcatEagerStream.single.subscription', () async {
+    final observable = ConcatEagerStream(_getStreams());
 
     observable.listen(null);
     await expectLater(() => observable.listen((_) {}), throwsA(isStateError));
   });
 
-  test('rx.Observable.concatEager.withEmptyStream', () async {
+  test('rx.ConcatEagerStream.withEmptyStream', () async {
     const expectedOutput = [0, 1, 2, 3, 4, 5];
     var count = 0;
 
-    final observable = Observable.concatEager(_getStreamsIncludingEmpty());
+    final observable = ConcatEagerStream(_getStreamsIncludingEmpty());
 
     observable.listen(expectAsync1((result) {
       // test to see if the combined output matches
@@ -50,7 +50,7 @@ void main() {
     }, count: expectedOutput.length));
   });
 
-  test('rx.Observable.concatEager.withBroadcastStreams', () async {
+  test('rx.ConcatEagerStream.withBroadcastStreams', () async {
     const expectedOutput = [1, 2, 3, 4, 99, 98, 97, 96, 999, 998, 997];
     final ctrlA = StreamController<int>.broadcast(),
         ctrlB = StreamController<int>.broadcast(),
@@ -74,7 +74,7 @@ void main() {
     });
 
     final observable =
-        Observable.concatEager([ctrlA.stream, ctrlB.stream, ctrlC.stream]);
+        ConcatEagerStream([ctrlA.stream, ctrlB.stream, ctrlC.stream]);
 
     observable.listen(expectAsync1((result) {
       // test to see if the combined output matches
@@ -82,9 +82,8 @@ void main() {
     }, count: expectedOutput.length));
   });
 
-  test('rx.Observable.concatEager.asBroadcastStream', () async {
-    final observable =
-        Observable.concatEager(_getStreams()).asBroadcastStream();
+  test('rx.ConcatEagerStream.asBroadcastStream', () async {
+    final observable = ConcatEagerStream(_getStreams()).asBroadcastStream();
 
     // listen twice on same stream
     observable.listen(null);
@@ -93,9 +92,9 @@ void main() {
     await expectLater(observable.isBroadcast, isTrue);
   });
 
-  test('rx.Observable.concatEager.error.shouldThrowA', () async {
-    final observableWithError = Observable.concatEager(
-        _getStreams()..add(ErrorStream<int>(Exception())));
+  test('rx.ConcatEagerStream.error.shouldThrowA', () async {
+    final observableWithError =
+        ConcatEagerStream(_getStreams()..add(Stream<int>.error(Exception())));
 
     observableWithError.listen(null,
         onError: expectAsync2((Exception e, StackTrace s) {
@@ -103,20 +102,20 @@ void main() {
     }));
   });
 
-  test('rx.Observable.concatEager.error.shouldThrowB', () {
-    expect(() => Observable<int>.concatEager(null), throwsArgumentError);
+  test('rx.ConcatEagerStream.error.shouldThrowB', () {
+    expect(() => ConcatEagerStream<int>(null), throwsArgumentError);
   });
 
-  test('rx.Observable.concatEager.error.shouldThrowC', () {
-    expect(() => Observable<int>.concatEager(const []), throwsArgumentError);
+  test('rx.ConcatEagerStream.error.shouldThrowC', () {
+    expect(() => ConcatEagerStream<int>(const []), throwsArgumentError);
   });
 
-  test('rx.Observable.concatEager.error.shouldThrowD', () {
-    expect(() => Observable.concatEager([Observable.just(1), null]),
+  test('rx.ConcatEagerStream.error.shouldThrowD', () {
+    expect(() => ConcatEagerStream([Observable.just(1), null]),
         throwsArgumentError);
   });
 
-  test('rx.Observable.concatEager.pause.resume', () async {
+  test('rx.ConcatEagerStream.pause.resume', () async {
     final first = Stream.periodic(const Duration(milliseconds: 10),
             (index) => const [1, 2, 3, 4][index]),
         second = Stream.periodic(const Duration(milliseconds: 10),
@@ -126,8 +125,8 @@ void main() {
 
     StreamSubscription<num> subscription;
     // ignore: deprecated_member_use
-    subscription = Observable.concatEager([first, second, last])
-        .listen(expectAsync1((value) {
+    subscription =
+        ConcatEagerStream([first, second, last]).listen(expectAsync1((value) {
       expect(value, 1);
 
       subscription.cancel();

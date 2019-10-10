@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:rxdart/rxdart.dart';
-import 'package:rxdart/src/observables/replay_observable.dart';
+import 'package:rxdart/src/streams/replay_stream.dart';
 
 /// A ConnectableObservable resembles an ordinary Observable, except that it
 /// can be listened to multiple times and does not begin emitting items when
@@ -10,19 +10,19 @@ import 'package:rxdart/src/observables/replay_observable.dart';
 /// This class can be used to broadcast a single-subscription Stream, and
 /// can be used to wait for all intended Observers to [listen] to the
 /// Observable before it begins emitting items.
-abstract class ConnectableObservable<T> extends Observable<T> {
-  ConnectableObservable(Stream<T> stream) : super(stream);
+abstract class ConnectableStream<T> extends StreamView<T> {
+  ConnectableStream(Stream<T> stream) : super(stream);
 
   /// Returns an Observable that automatically connects (at most once) to this
   /// ConnectableObservable when the first Observer subscribes.
   ///
   /// To disconnect from the source Stream, provide a [connection] callback and
   /// cancel the `subscription` at the appropriate time.
-  Observable<T> autoConnect({
+  Stream<T> autoConnect({
     void Function(StreamSubscription<T> subscription) connection,
   });
 
-  /// Instructs the [ConnectableObservable] to begin emitting items from the
+  /// Instructs the [ConnectableStream] to begin emitting items from the
   /// source Stream. To disconnect from the source stream, cancel the
   /// subscription.
   StreamSubscription<T> connect();
@@ -30,23 +30,23 @@ abstract class ConnectableObservable<T> extends Observable<T> {
   /// Returns an Observable that stays connected to this ConnectableObservable
   /// as long as there is at least one subscription to this
   /// ConnectableObservable.
-  Observable<T> refCount();
+  Stream<T> refCount();
 }
 
-/// A [ConnectableObservable] that converts a single-subscription Stream into
+/// A [ConnectableStream] that converts a single-subscription Stream into
 /// a broadcast Stream.
-class PublishConnectableObservable<T> extends ConnectableObservable<T> {
+class PublishConnectableStream<T> extends ConnectableStream<T> {
   final Stream<T> _source;
   final PublishSubject<T> _subject;
 
-  factory PublishConnectableObservable(Stream<T> source) {
-    return PublishConnectableObservable<T>._(source, PublishSubject<T>());
+  factory PublishConnectableStream(Stream<T> source) {
+    return PublishConnectableStream<T>._(source, PublishSubject<T>());
   }
 
-  PublishConnectableObservable._(this._source, this._subject) : super(_subject);
+  PublishConnectableStream._(this._source, this._subject) : super(_subject);
 
   @override
-  Observable<T> autoConnect({
+  Stream<T> autoConnect({
     void Function(StreamSubscription<T> subscription) connection,
   }) {
     _subject.onListen = () {
@@ -69,7 +69,7 @@ class PublishConnectableObservable<T> extends ConnectableObservable<T> {
   }
 
   @override
-  Observable<T> refCount() {
+  Stream<T> refCount() {
     ConnectableObservableStreamSubscription<T> subscription;
 
     _subject.onListen = () {
@@ -87,33 +87,33 @@ class PublishConnectableObservable<T> extends ConnectableObservable<T> {
   }
 }
 
-/// A [ConnectableObservable] that converts a single-subscription Stream into
+/// A [ConnectableStream] that converts a single-subscription Stream into
 /// a broadcast Stream that replays the latest value to any new listener, and
 /// provides synchronous access to the latest emitted value.
-class ValueConnectableObservable<T> extends ConnectableObservable<T>
-    implements ValueObservable<T> {
+class ValueConnectableStream<T> extends ConnectableStream<T>
+    implements ValueStream<T> {
   final Stream<T> _source;
   final BehaviorSubject<T> _subject;
 
-  ValueConnectableObservable._(this._source, this._subject) : super(_subject);
+  ValueConnectableStream._(this._source, this._subject) : super(_subject);
 
-  factory ValueConnectableObservable(Stream<T> source) =>
-      ValueConnectableObservable<T>._(
+  factory ValueConnectableStream(Stream<T> source) =>
+      ValueConnectableStream<T>._(
         source,
         BehaviorSubject<T>(),
       );
 
-  factory ValueConnectableObservable.seeded(
+  factory ValueConnectableStream.seeded(
     Stream<T> source,
     T seedValue,
   ) =>
-      ValueConnectableObservable<T>._(
+      ValueConnectableStream<T>._(
         source,
         BehaviorSubject<T>.seeded(seedValue),
       );
 
   @override
-  ValueObservable<T> autoConnect({
+  ValueStream<T> autoConnect({
     void Function(StreamSubscription<T> subscription) connection,
   }) {
     _subject.onListen = () {
@@ -136,7 +136,7 @@ class ValueConnectableObservable<T> extends ConnectableObservable<T>
   }
 
   @override
-  ValueObservable<T> refCount() {
+  ValueStream<T> refCount() {
     ConnectableObservableStreamSubscription<T> subscription;
 
     _subject.onListen = () {
@@ -160,25 +160,25 @@ class ValueConnectableObservable<T> extends ConnectableObservable<T>
   bool get hasValue => _subject.hasValue;
 }
 
-/// A [ConnectableObservable] that converts a single-subscription Stream into
+/// A [ConnectableStream] that converts a single-subscription Stream into
 /// a broadcast Stream that replays emitted items to any new listener, and
 /// provides synchronous access to the list of emitted values.
-class ReplayConnectableObservable<T> extends ConnectableObservable<T>
-    implements ReplayObservable<T> {
+class ReplayConnectableStream<T> extends ConnectableStream<T>
+    implements ReplayStream<T> {
   final Stream<T> _source;
   final ReplaySubject<T> _subject;
 
-  factory ReplayConnectableObservable(Stream<T> stream, {int maxSize}) {
-    return ReplayConnectableObservable<T>._(
+  factory ReplayConnectableStream(Stream<T> stream, {int maxSize}) {
+    return ReplayConnectableStream<T>._(
       stream,
       ReplaySubject<T>(maxSize: maxSize),
     );
   }
 
-  ReplayConnectableObservable._(this._source, this._subject) : super(_subject);
+  ReplayConnectableStream._(this._source, this._subject) : super(_subject);
 
   @override
-  ReplayObservable<T> autoConnect({
+  ReplayStream<T> autoConnect({
     void Function(StreamSubscription<T> subscription) connection,
   }) {
     _subject.onListen = () {
@@ -201,7 +201,7 @@ class ReplayConnectableObservable<T> extends ConnectableObservable<T>
   }
 
   @override
-  ReplayObservable<T> refCount() {
+  ReplayStream<T> refCount() {
     ConnectableObservableStreamSubscription<T> subscription;
 
     _subject.onListen = () {

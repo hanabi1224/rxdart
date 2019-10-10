@@ -1,46 +1,44 @@
 import 'dart:async';
 
-import 'package:rxdart/src/observables/observable.dart' show Observable;
-
 /// The GroupBy operator divides an [Observable] that emits items into
-/// an [Observable] that emits [GroupByObservable],
+/// an [Observable] that emits [GroupByStream],
 /// each one of which emits some subset of the items
 /// from the original source [Observable].
 ///
-/// [GroupByObservable] acts like a regular [Observable], yet
+/// [GroupByStream] acts like a regular [Observable], yet
 /// adding a 'key' property, which receives its [Type] and value from
 /// the [grouper] Function.
 ///
-/// All items with the same key are emitted by the same [GroupByObservable].
+/// All items with the same key are emitted by the same [GroupByStream].
 
 class GroupByStreamTransformer<T, S>
-    extends StreamTransformerBase<T, GroupByObservable<T, S>> {
+    extends StreamTransformerBase<T, GroupByStream<T, S>> {
   final S Function(T) grouper;
 
   GroupByStreamTransformer(this.grouper);
 
   @override
-  Stream<GroupByObservable<T, S>> bind(Stream<T> stream) =>
+  Stream<GroupByStream<T, S>> bind(Stream<T> stream) =>
       _buildTransformer<T, S>(grouper).bind(stream);
 
-  static StreamTransformer<T, GroupByObservable<T, S>> _buildTransformer<T, S>(
+  static StreamTransformer<T, GroupByStream<T, S>> _buildTransformer<T, S>(
       S Function(T) grouper) {
-    return StreamTransformer<T, GroupByObservable<T, S>>(
+    return StreamTransformer<T, GroupByStream<T, S>>(
         (Stream<T> input, bool cancelOnError) {
       final mapper = <S, StreamController<T>>{};
-      StreamController<GroupByObservable<T, S>> controller;
+      StreamController<GroupByStream<T, S>> controller;
       StreamSubscription<T> subscription;
 
       final controllerBuilder = (S forKey) => () {
             final groupedController = StreamController<T>();
 
             controller
-                .add(GroupByObservable<T, S>(forKey, groupedController.stream));
+                .add(GroupByStream<T, S>(forKey, groupedController.stream));
 
             return groupedController;
           };
 
-      controller = StreamController<GroupByObservable<T, S>>(
+      controller = StreamController<GroupByStream<T, S>>(
           sync: true,
           onListen: () {
             subscription = input.listen(
@@ -74,8 +72,8 @@ class GroupByStreamTransformer<T, S>
   }
 }
 
-class GroupByObservable<T, S> extends Observable<T> {
+class GroupByStream<T, S> extends StreamView<T> {
   final S key;
 
-  GroupByObservable(this.key, Stream<T> stream) : super(stream);
+  GroupByStream(this.key, Stream<T> stream) : super(stream);
 }

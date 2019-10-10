@@ -7,7 +7,7 @@ void main() {
   const num expected = 0;
 
   test('rx.Observable.onErrorReturn', () async {
-    Observable<num>(ErrorStream<num>(Exception()))
+    Observable<num>(Stream<num>.error(Exception()))
         .onErrorReturn(0)
         .listen(expectAsync1((num result) {
       expect(result, expected);
@@ -15,7 +15,7 @@ void main() {
   });
 
   test('rx.Observable.onErrorReturn.asBroadcastStream', () async {
-    Stream<num> stream = Observable<num>(ErrorStream<num>(Exception()))
+    Stream<num> stream = Observable<num>(Stream<num>.error(Exception()))
         .onErrorReturn(0)
         .asBroadcastStream();
 
@@ -33,7 +33,7 @@ void main() {
   test('rx.Observable.onErrorReturn.pause.resume', () async {
     StreamSubscription<num> subscription;
 
-    subscription = Observable<num>(ErrorStream<num>(Exception()))
+    subscription = Observable<num>(Stream<num>.error(Exception()))
         .onErrorReturn(0)
         .listen(expectAsync1((num result) {
       expect(result, expected);

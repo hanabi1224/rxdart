@@ -7,7 +7,7 @@ import 'package:test/test.dart';
 void main() {
   test('rx.Observable.retryWhen', () {
     expect(
-      Observable.retryWhen(_sourceStream(3), _alwaysThrow),
+      RetryWhenStream(_sourceStream(3), _alwaysThrow),
       emitsInOrder(<dynamic>[0, 1, 2, emitsDone]),
     );
   });
@@ -108,13 +108,13 @@ void main() {
 
 Stream<int> Function() _sourceStream(int i, [int throwAt]) {
   return throwAt == null
-      ? () => Observable.fromIterable(range(i))
-      : () => Observable.fromIterable(range(i))
-          .map((i) => i == throwAt ? throw i : i);
+      ? () => Stream.fromIterable(range(i))
+      : () =>
+          Stream.fromIterable(range(i)).map((i) => i == throwAt ? throw i : i);
 }
 
 Stream<void> _alwaysThrow(dynamic e, StackTrace s) =>
-    Observable<void>.error(Error());
+    Stream<void>.error(Error());
 
 Stream<void> _neverThrow(dynamic e, StackTrace s) => Observable.just('');
 
@@ -128,7 +128,7 @@ Stream<int> Function() _getStreamWithExtras(int failCount) {
       // Emit first item
       return Observable.just(1)
           // Emit the error
-          .concatWith([ErrorStream<int>(Error())])
+          .concatWith([Stream<int>.error(Error())])
           // Emit an extra item, testing that it is not included
           .concatWith([Observable.just(1)]);
     } else {

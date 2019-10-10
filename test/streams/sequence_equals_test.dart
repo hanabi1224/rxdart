@@ -4,16 +4,16 @@ import 'package:rxdart/rxdart.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('rx.Observable.sequenceEqual.equals', () async {
-    final observable = Observable.sequenceEqual(
+  test('rx.SequenceEqualStream.equals', () async {
+    final observable = SequenceEqualStream(
         Stream.fromIterable(const [1, 2, 3, 4, 5]),
         Stream.fromIterable(const [1, 2, 3, 4, 5]));
 
     await expectLater(observable, emitsInOrder(<dynamic>[true, emitsDone]));
   });
 
-  test('rx.Observable.sequenceEqual.diffTime.equals', () async {
-    final observable = Observable.sequenceEqual(
+  test('rx.SequenceEqualStream.diffTime.equals', () async {
+    final observable = SequenceEqualStream(
         Stream.periodic(const Duration(milliseconds: 100), (i) => i + 1)
             .take(5),
         Stream.fromIterable(const [1, 2, 3, 4, 5]));
@@ -21,8 +21,8 @@ void main() {
     await expectLater(observable, emitsInOrder(<dynamic>[true, emitsDone]));
   });
 
-  test('rx.Observable.sequenceEqual.equals.customCompare.equals', () async {
-    final observable = Observable.sequenceEqual(
+  test('rx.SequenceEqualStream.equals.customCompare.equals', () async {
+    final observable = SequenceEqualStream(
         Stream.fromIterable(const [1, 1, 1, 1, 1]),
         Stream.fromIterable(const [2, 2, 2, 2, 2]),
         equals: (int a, int b) => true);
@@ -30,8 +30,8 @@ void main() {
     await expectLater(observable, emitsInOrder(<dynamic>[true, emitsDone]));
   });
 
-  test('rx.Observable.sequenceEqual.diffTime.notEquals', () async {
-    final observable = Observable.sequenceEqual(
+  test('rx.SequenceEqualStream.diffTime.notEquals', () async {
+    final observable = SequenceEqualStream(
         Stream.periodic(const Duration(milliseconds: 100), (i) => i + 1)
             .take(5),
         Stream.fromIterable(const [1, 1, 1, 1, 1]));
@@ -39,16 +39,16 @@ void main() {
     await expectLater(observable, emitsInOrder(<dynamic>[false, emitsDone]));
   });
 
-  test('rx.Observable.sequenceEqual.notEquals', () async {
-    final observable = Observable.sequenceEqual(
+  test('rx.SequenceEqualStream.notEquals', () async {
+    final observable = SequenceEqualStream(
         Stream.fromIterable(const [1, 2, 3, 4, 5]),
         Stream.fromIterable(const [1, 2, 3, 5, 4]));
 
     await expectLater(observable, emitsInOrder(<dynamic>[false, emitsDone]));
   });
 
-  test('rx.Observable.sequenceEqual.equals.customCompare.notEquals', () async {
-    final observable = Observable.sequenceEqual(
+  test('rx.SequenceEqualStream.equals.customCompare.notEquals', () async {
+    final observable = SequenceEqualStream(
         Stream.fromIterable(const [1, 1, 1, 1, 1]),
         Stream.fromIterable(const [1, 1, 1, 1, 1]),
         equals: (int a, int b) => false);
@@ -56,8 +56,8 @@ void main() {
     await expectLater(observable, emitsInOrder(<dynamic>[false, emitsDone]));
   });
 
-  test('rx.Observable.sequenceEqual.notEquals.differentLength', () async {
-    final observable = Observable.sequenceEqual(
+  test('rx.SequenceEqualStream.notEquals.differentLength', () async {
+    final observable = SequenceEqualStream(
         Stream.fromIterable(const [1, 2, 3, 4, 5]),
         Stream.fromIterable(const [1, 2, 3, 4, 5, 6]));
 
@@ -65,9 +65,9 @@ void main() {
   });
 
   test(
-      'rx.Observable.sequenceEqual.notEquals.differentLength.customCompare.notEquals',
+      'rx.SequenceEqualStream.notEquals.differentLength.customCompare.notEquals',
       () async {
-    final observable = Observable.sequenceEqual(
+    final observable = SequenceEqualStream(
         Stream.fromIterable(const [1, 2, 3, 4, 5]),
         Stream.fromIterable(const [1, 2, 3, 4, 5, 6]),
         equals: (int a, int b) => true);
@@ -78,24 +78,24 @@ void main() {
     await expectLater(observable, emitsInOrder(<dynamic>[false, emitsDone]));
   });
 
-  test('rx.Observable.sequenceEqual.equals.errors', () async {
-    final observable = Observable.sequenceEqual(
-        Observable<void>.error(ArgumentError('error A')),
-        Observable<void>.error(ArgumentError('error A')));
+  test('rx.SequenceEqualStream.equals.errors', () async {
+    final observable = SequenceEqualStream(
+        Stream<void>.error(ArgumentError('error A')),
+        Stream<void>.error(ArgumentError('error A')));
 
     await expectLater(observable, emitsInOrder(<dynamic>[true, emitsDone]));
   });
 
-  test('rx.Observable.sequenceEqual.notEquals.errors', () async {
-    final observable = Observable.sequenceEqual(
-        Observable<void>.error(ArgumentError('error A')),
-        Observable<void>.error(ArgumentError('error B')));
+  test('rx.SequenceEqualStream.notEquals.errors', () async {
+    final observable = SequenceEqualStream(
+        Stream<void>.error(ArgumentError('error A')),
+        Stream<void>.error(ArgumentError('error B')));
 
     await expectLater(observable, emitsInOrder(<dynamic>[false, emitsDone]));
   });
 
-  test('rx.Observable.sequenceEqual.single.subscription', () async {
-    final observable = Observable.sequenceEqual(
+  test('rx.SequenceEqualStream.single.subscription', () async {
+    final observable = SequenceEqualStream(
         Stream.fromIterable(const [1, 2, 3, 4, 5]),
         Stream.fromIterable(const [1, 2, 3, 4, 5]));
 
@@ -103,8 +103,8 @@ void main() {
     await expectLater(() => observable.listen(null), throwsA(isStateError));
   });
 
-  test('rx.Observable.sequenceEqual.asBroadcastStream', () async {
-    final observable = Observable.sequenceEqual(
+  test('rx.SequenceEqualStream.asBroadcastStream', () async {
+    final observable = SequenceEqualStream(
             Stream.fromIterable(const [1, 2, 3, 4, 5]),
             Stream.fromIterable(const [1, 2, 3, 4, 5]))
         .asBroadcastStream()
@@ -115,16 +115,16 @@ void main() {
     await expectLater(observable, emitsDone);
   });
 
-  test('rx.Observable.sequenceEqual.error.shouldThrowA', () {
+  test('rx.SequenceEqualStream.error.shouldThrowA', () {
     expect(
-        () => Observable.sequenceEqual<int, void>(
+        () => SequenceEqualStream<int, void>(
             Stream.fromIterable(const [1, 2, 3, 4, 5]), null),
         throwsArgumentError);
   });
 
-  test('rx.Observable.sequenceEqual.error.shouldThrowB', () {
+  test('rx.SequenceEqualStream.error.shouldThrowB', () {
     expect(
-        () => Observable.sequenceEqual<void, int>(
+        () => SequenceEqualStream<void, int>(
             null, Stream.fromIterable(const [1, 2, 3, 4, 5])),
         throwsArgumentError);
   });

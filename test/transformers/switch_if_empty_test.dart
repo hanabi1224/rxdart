@@ -6,7 +6,7 @@ import 'package:test/test.dart';
 void main() {
   test('rx.Observable.switchIfEmpty.whenEmpty', () async {
     expect(
-      Observable<int>.empty().switchIfEmpty(Observable.just(1)),
+      Stream<int>.empty().switchIfEmpty(Observable.just(1)),
       emitsInOrder(<dynamic>[1, emitsDone]),
     );
   });
@@ -22,15 +22,11 @@ void main() {
     final transformer = SwitchIfEmptyStreamTransformer<bool>(
         Observable.just(true).asBroadcastStream());
 
-    Observable(Stream<bool>.empty())
-        .transform(transformer)
-        .listen(expectAsync1((result) {
+    Stream<bool>.empty().transform(transformer).listen(expectAsync1((result) {
           expect(result, true);
         }, count: 1));
 
-    Observable(Stream<bool>.empty())
-        .transform(transformer)
-        .listen(expectAsync1((result) {
+    Stream<bool>.empty().transform(transformer).listen(expectAsync1((result) {
           expect(result, true);
         }, count: 1));
   });
@@ -44,7 +40,7 @@ void main() {
   });
 
   test('rx.Observable.switchIfEmpty.asBroadcastStream', () async {
-    final stream = Observable(Stream<int>.empty())
+    final stream = Stream<int>.empty()
         .switchIfEmpty(Observable.just(1))
         .asBroadcastStream();
 
@@ -57,8 +53,8 @@ void main() {
   });
 
   test('rx.Observable.switchIfEmpty.error.shouldThrowA', () async {
-    final observableWithError = Observable(ErrorStream<int>(Exception()))
-        .switchIfEmpty(Observable.just(1));
+    final observableWithError =
+        Stream<int>.error(Exception()).switchIfEmpty(Observable.just(1));
 
     observableWithError.listen(null,
         onError: expectAsync2((Exception e, StackTrace s) {
@@ -67,14 +63,12 @@ void main() {
   });
 
   test('rx.Observable.switchIfEmpty.error.shouldThrowB', () {
-    expect(() => Observable<void>.empty().switchIfEmpty(null),
-        throwsArgumentError);
+    expect(() => Stream<void>.empty().switchIfEmpty(null), throwsArgumentError);
   });
 
   test('rx.Observable.switchIfEmpty.pause.resume', () async {
     StreamSubscription<int> subscription;
-    final stream =
-        Observable(Stream<int>.empty()).switchIfEmpty(Observable.just(1));
+    final stream = Stream<int>.empty().switchIfEmpty(Observable.just(1));
 
     subscription = stream.listen(expectAsync1((value) {
       expect(value, 1);

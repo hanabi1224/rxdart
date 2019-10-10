@@ -206,7 +206,7 @@
       * `observable` factory -- replaced by the constructor `new Observable()`
       * `combineLatest` -- replaced by Strong-Mode versions `combineLatest2` - `combineLatest9`
       * `zip` -- replaced by Strong-Mode versions `zip2` - `zip9`
-    * Support `asObservable` conversion from Future-returning methods. e.g. `new Observable.fromIterable([1, 2]).first.asObservable()`
+    * Support `asObservable` conversion from Future-returning methods. e.g. `new Stream.fromIterable([1, 2]).first.asObservable()`
     * Max and Min now return a Future of the Max or Min value, rather than a stream of increasing or decreasing values.
     * Add `cast` operator
     * Remove `ConcatMapStreamTransformer` -- functionality is already supported by `asyncExpand`. Keep the `concatMap` method as an alias.

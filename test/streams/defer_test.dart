@@ -40,7 +40,7 @@ void main() {
   });
 
   test('rx.Observable.defer.error.shouldThrow', () async {
-    final observableWithError = Observable.defer(() => _getErroneousStream());
+    final observableWithError = DeferStream(() => _getErroneousStream());
 
     observableWithError.listen(null,
         onError: expectAsync1((Exception e) {
@@ -49,10 +49,10 @@ void main() {
   });
 }
 
-Stream<int> _getDeferStream() => Observable.defer(() => Observable.just(1));
+Stream<int> _getDeferStream() => DeferStream(() => Observable.just(1));
 
 Stream<int> _getBroadcastDeferStream() =>
-    Observable.defer(() => Observable.just(1)).asBroadcastStream();
+    DeferStream(() => Observable.just(1)).asBroadcastStream();
 
 Stream<int> _getErroneousStream() {
   final controller = StreamController<int>();

@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:rxdart/rxdart.dart';
-import 'package:rxdart/src/observables/observable.dart';
 import 'package:test/test.dart';
 
 Stream<int> _getStream() =>
@@ -31,7 +30,7 @@ void main() {
     ];
     var count = 0;
 
-    Observable(_getStream())
+    _getStream()
         .withLatestFrom(
             _getLatestFromStream(), (first, int second) => Pair(first, second))
         .take(5)
@@ -53,23 +52,17 @@ void main() {
     ];
     var countA = 0, countB = 0;
 
-    Observable(_getStream())
-        .transform(transformer)
-        .take(5)
-        .listen(expectAsync1((result) {
+    _getStream().transform(transformer).take(5).listen(expectAsync1((result) {
           expect(result, expectedOutput[countA++]);
         }, count: expectedOutput.length));
 
-    Observable(_getStream())
-        .transform(transformer)
-        .take(5)
-        .listen(expectAsync1((result) {
+    _getStream().transform(transformer).take(5).listen(expectAsync1((result) {
           expect(result, expectedOutput[countB++]);
         }, count: expectedOutput.length));
   });
 
   test('rx.Observable.withLatestFrom.asBroadcastStream', () async {
-    final stream = Observable(_getStream().asBroadcastStream()).withLatestFrom(
+    final stream = _getStream().asBroadcastStream().withLatestFrom(
         _getLatestFromStream().asBroadcastStream(), (first, int second) => 0);
 
     // listen twice on same stream
@@ -80,7 +73,7 @@ void main() {
   });
 
   test('rx.Observable.withLatestFrom.error.shouldThrowA', () async {
-    final observableWithError = Observable(ErrorStream<int>(Exception()))
+    final observableWithError = Stream<int>.error(Exception())
         .withLatestFrom(_getLatestFromStream(), (first, int second) => "Hello");
 
     observableWithError.listen(null,
@@ -98,7 +91,7 @@ void main() {
 
   test('rx.Observable.withLatestFrom.error.shouldThrowC', () {
     expect(
-        () => Observable(_getStream())
+        () => _getStream()
             .withLatestFrom<int, void>(_getLatestFromStream(), null),
         throwsArgumentError);
   });
@@ -108,7 +101,7 @@ void main() {
     const expectedOutput = [Pair(2, 0)];
     var count = 0;
 
-    subscription = Observable(_getStream())
+    subscription = _getStream()
         .withLatestFrom(
             _getLatestFromStream(), (first, int second) => Pair(first, second))
         .take(1)
@@ -126,11 +119,11 @@ void main() {
 
   test('rx.Observable.withLatestFrom.otherEmitsNull', () async {
     const expected = Pair(1, null);
-    final observable = Observable.timer(
+    final observable = TimerStream(
       1,
       const Duration(microseconds: 100),
     ).withLatestFrom(
-      Observable<int>.just(null),
+      Observable.just(null),
       (a, int b) => Pair(a, b),
     );
 
@@ -141,11 +134,11 @@ void main() {
   });
 
   test('rx.Observable.withLatestFrom.otherNotEmit', () async {
-    final observable = Observable.timer(
+    final observable = TimerStream(
       1,
       const Duration(microseconds: 100),
     ).withLatestFrom(
-      Observable<int>.empty(),
+      Stream<int>.empty(),
       (a, int b) => Pair(a, b),
     );
 
@@ -165,7 +158,7 @@ void main() {
     ];
     var count = 0;
 
-    Observable(_getStream())
+    _getStream()
         .withLatestFrom2(
           _getLatestFromStream(),
           _getLatestFromStream2(),
@@ -190,7 +183,7 @@ void main() {
     ];
     var count = 0;
 
-    Observable(_getStream())
+    _getStream()
         .withLatestFrom3(
           _getLatestFromStream(),
           _getLatestFromStream2(),
@@ -217,7 +210,7 @@ void main() {
     ];
     var count = 0;
 
-    Observable(_getStream())
+    _getStream()
         .withLatestFrom4(
           _getLatestFromStream(),
           _getLatestFromStream2(),
@@ -236,7 +229,7 @@ void main() {
   });
 
   test('rx.Observable.withLatestFrom5', () async {
-    final observable = Observable.timer(
+    final observable = TimerStream(
       1,
       const Duration(microseconds: 100),
     ).withLatestFrom5(
@@ -256,7 +249,7 @@ void main() {
   });
 
   test('rx.Observable.withLatestFrom6', () async {
-    final observable = Observable.timer(
+    final observable = TimerStream(
       1,
       const Duration(microseconds: 100),
     ).withLatestFrom6(
@@ -278,7 +271,7 @@ void main() {
   });
 
   test('rx.Observable.withLatestFrom7', () async {
-    final observable = Observable.timer(
+    final observable = TimerStream(
       1,
       const Duration(microseconds: 100),
     ).withLatestFrom7(
@@ -301,7 +294,7 @@ void main() {
   });
 
   test('rx.Observable.withLatestFrom8', () async {
-    final observable = Observable.timer(
+    final observable = TimerStream(
       1,
       const Duration(microseconds: 100),
     ).withLatestFrom8(
@@ -325,7 +318,7 @@ void main() {
   });
 
   test('rx.Observable.withLatestFrom9', () async {
-    final observable = Observable.timer(
+    final observable = TimerStream(
       1,
       const Duration(microseconds: 100),
     ).withLatestFrom9(
@@ -350,7 +343,7 @@ void main() {
   });
 
   test('rx.Observable.withLatestFromList', () async {
-    final observable = Observable.timer(
+    final observable = TimerStream(
       1,
       const Duration(microseconds: 100),
     ).withLatestFromList(
@@ -375,8 +368,7 @@ void main() {
   });
 
   test('rx.Observable.withLatestFromList.emptyList', () async {
-    final observable =
-        Observable.fromIterable([1, 2, 3]).withLatestFromList([]);
+    final observable = Stream.fromIterable([1, 2, 3]).withLatestFromList([]);
 
     await expectLater(
       observable,

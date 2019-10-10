@@ -39,9 +39,7 @@ void main() {
     const expectedOutput = [5, 6, 7, 8];
     var count = 0;
 
-    Observable(_getStream())
-        .switchMap(_getOtherStream)
-        .listen(expectAsync1((result) {
+    _getStream().switchMap(_getOtherStream).listen(expectAsync1((result) {
           expect(result, expectedOutput[count++]);
         }, count: expectedOutput.length));
   });
@@ -51,22 +49,17 @@ void main() {
     const expectedOutput = [5, 6, 7, 8];
     var countA = 0, countB = 0;
 
-    Observable(_getStream())
-        .transform(transformer)
-        .listen(expectAsync1((result) {
+    _getStream().transform(transformer).listen(expectAsync1((result) {
           expect(result, expectedOutput[countA++]);
         }, count: expectedOutput.length));
 
-    Observable(_getStream())
-        .transform(transformer)
-        .listen(expectAsync1((result) {
+    _getStream().transform(transformer).listen(expectAsync1((result) {
           expect(result, expectedOutput[countB++]);
         }, count: expectedOutput.length));
   });
 
   test('rx.Observable.switchMap.asBroadcastStream', () async {
-    final stream =
-        Observable(_getStream().asBroadcastStream()).switchMap(_getOtherStream);
+    final stream = _getStream().asBroadcastStream().switchMap(_getOtherStream);
 
     // listen twice on same stream
     stream.listen(null);
@@ -77,7 +70,7 @@ void main() {
 
   test('rx.Observable.switchMap.error.shouldThrowA', () async {
     final observableWithError =
-        Observable(ErrorStream<int>(Exception())).switchMap(_getOtherStream);
+        Stream<int>.error(Exception()).switchMap(_getOtherStream);
 
     observableWithError.listen(null,
         onError: expectAsync2((Exception e, StackTrace s) {
@@ -86,8 +79,8 @@ void main() {
   });
 
   test('rx.Observable.switchMap.error.shouldThrowB', () async {
-    final observableWithError = Observable.just(1)
-        .switchMap((_) => ErrorStream<void>(Exception('Catch me if you can!')));
+    final observableWithError = Observable.just(1).switchMap(
+        (_) => Stream<void>.error(Exception('Catch me if you can!')));
 
     observableWithError.listen(null,
         onError: expectAsync2((Exception e, StackTrace s) {

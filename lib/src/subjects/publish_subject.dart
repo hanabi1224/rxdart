@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:rxdart/src/observables/observable.dart';
 import 'package:rxdart/src/subjects/subject.dart';
 
 /// Exactly like a normal broadcast StreamController with one exception:
@@ -26,7 +25,7 @@ import 'package:rxdart/src/subjects/subject.dart';
 ///     subject.add(3);
 ///     subject.close();
 class PublishSubject<T> extends Subject<T> {
-  PublishSubject._(StreamController<T> controller, Observable<T> observable)
+  PublishSubject._(StreamController<T> controller, Stream<T> observable)
       : super(controller, observable);
 
   factory PublishSubject(
@@ -40,7 +39,7 @@ class PublishSubject<T> extends Subject<T> {
 
     return PublishSubject<T>._(
       controller,
-      Observable<T>(controller.stream),
+      controller.stream,
     );
   }
 }

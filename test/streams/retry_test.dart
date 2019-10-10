@@ -6,13 +6,6 @@ import 'package:rxdart/src/streams/utils.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('rx.Observable.retry', () async {
-    const retries = 3;
-
-    await expectLater(Observable.retry(_getRetryStream(retries), retries),
-        emitsInOrder(<dynamic>[1, emitsDone]));
-  });
-
   test('RetryStream', () async {
     const retries = 3;
 
@@ -113,7 +106,10 @@ Stream<int> Function() _getRetryStream(int failCount) {
   return () {
     if (count < failCount) {
       count++;
-      return ErrorStream<int>(Error());
+      return Stream<int>.error(
+        Error(),
+        StackTrace.fromString('S'),
+      );
     } else {
       return Observable.just(1);
     }
@@ -130,7 +126,7 @@ Stream<int> Function() _getStreamWithExtras(int failCount) {
       // Emit first item
       return Observable.just(1)
           // Emit the error
-          .concatWith([ErrorStream<int>(Error())])
+          .concatWith([Stream<int>.error(Error())])
           // Emit an extra item, testing that it is not included
           .concatWith([Observable.just(1)]);
     } else {

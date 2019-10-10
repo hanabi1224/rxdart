@@ -46,7 +46,7 @@ void main() {
   });
 
   test('materializeTransformer.sadPath', () async {
-    final stream = ErrorStream<int>(Exception());
+    final stream = Stream<int>.error(Exception());
     final notifications = <Notification<int>>[];
 
     stream

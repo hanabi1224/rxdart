@@ -3,9 +3,8 @@ import 'dart:async';
 import 'package:rxdart/rxdart.dart';
 import 'package:test/test.dart';
 
-Observable<int> _observable() =>
-    Observable.periodic(const Duration(milliseconds: 100), (i) => i + 1)
-        .take(10);
+Stream<int> _observable() =>
+    Stream.periodic(const Duration(milliseconds: 100), (i) => i + 1).take(10);
 
 void main() {
   test('rx.Observable.throttle', () async {
@@ -73,9 +72,8 @@ void main() {
   });
 
   test('rx.Observable.throttle.error.shouldThrowA', () async {
-    final observableWithError = Observable(ErrorStream<void>(Exception()))
-        .throttle(
-            (_) => Stream<void>.periodic(const Duration(milliseconds: 250)));
+    final observableWithError = Stream<void>.error(Exception()).throttle(
+        (_) => Stream<void>.periodic(const Duration(milliseconds: 250)));
 
     observableWithError.listen(null,
         onError: expectAsync2((Exception e, StackTrace s) {
