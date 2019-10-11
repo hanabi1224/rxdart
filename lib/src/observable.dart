@@ -1,5 +1,3 @@
-import 'package:rxdart/rxdart.dart';
-import 'package:rxdart/src/streams/replay_stream.dart';
 import 'package:rxdart/streams.dart';
 import 'package:rxdart/transformers.dart';
 
