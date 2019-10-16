@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:rxdart/src/extensions.dart';
 import 'package:rxdart/src/observables/observable.dart';
 import 'package:rxdart/src/observables/value_observable.dart';
 import 'package:rxdart/src/subjects/subject.dart';
+import 'package:rxdart/src/transformers/start_with.dart';
 
 /// A special StreamController that captures the latest item that has been
 /// added to the controller, and emits that as the first item to any new
